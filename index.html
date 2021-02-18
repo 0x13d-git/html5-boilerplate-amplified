@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en" class="h-100">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Ari Ugwu">
+    <meta name="generator" content="copper-lob">
+    <title>Badactor.io - Cyber Range and Skills Platform</title>
+    <link rel="canonical" href="https://badactor.io">
+​
+    <!-- Abstract 
+      _If_ the point of complicated frameworks aligns with this write-up: https://learnreact.design/posts/what-is-react
+      _and_ modern browsers now offer many of these features.
+      _then_ we don't need heavy frameworks anymore
+    -->
+​
+    <!-- Summary 
+      Quick reading on the moving pieces
+      0. [ui tech stack] https://jamstack.org/
+      1. [app shell] https://developers.google.com/web/fundamentals/architecture/app-shell
+      2. [state management] https://redux-toolkit.js.org/tutorials/basic-tutorial Redux
+      3. [service fabric] https://aws.amazon.com/amplify/ AmplifyJS
+      4. [web components] https://polymer-library.polymer-project.org/3.0/docs/devguide/feature-overview Polymer
+        * More component info: https://www.webcomponents.org/
+        * Polymer tuts: https://dev.to/bennypowers/lets-build-web-components-part-4-polymer-library-4dk2
+    -->
+​
+    <!-- Material Icons fonts. -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+​
+    <!-- 
+      # Favicons
+        * @SEE: https://www.keycdn.com/blog/make-a-favicon
+    -->
+    
+    <!-- <link rel="shortcut icon" href="//cdn.keycdn.com/favicon.ico">
+    <link rel="icon" sizes="16x16 32x32 64x64" href="//cdn.keycdn.com/favicon.ico">
+    <link rel="apple-touch-icon" href="//cdn.keycdn.com/apple-touch-icon.png"> -->
+​
+    <!-- AWS Amplify 
+    //@ SEE: https://www.reddit.com/r/aws/comments/d71c5w/aws_amplify_for_vanilla_javascript_urgent/f0x9x3o?utm_source=share&utm_medium=web2x&context=3
+      - exports object is created before brining in the aws-amplify source so it has something to populate.
+      - ref: https://docs.amplify.aws/lib/datastore/getting-started/q/platform/js
+    -->
+    <script>
+      var exports = {};
+    </script>
+​
+    <script src="https://unpkg.com/aws-amplify@1.1.40/dist/aws-amplify.min.js"></script>
+    <script>
+      
+      var AWSAmplify = exports['aws-amplify'];
+​
+      var Amplify = AWSAmplify.default;
+​
+      /* HUB: PubSub Example */
+      var Hub = AWSAmplify.Hub;
+​
+      console.log(Hub);
+​
+      Hub.listen('WhatThe', (data) => {          
+        console.log(data);
+      })
+​
+      Hub.dispatch(
+          'WhatThe', 
+          { 
+              event: 'buttonClick', 
+              data: {color:'blue'}, 
+              message:'' 
+      });
+​
+      console.log(Object.keys(AWSAmplify));
+    </script>
+​
+    <!-- ReDuX ToolKit: Using Amplify HUB -->
+    <script src="https://unpkg.com/@reduxjs/toolkit@latest/dist/redux-toolkit.umd.js"></script>
+    <script>
+​
+      const RTK = window.RTK;
+      
+      const counterSlice = RTK.createSlice({
+        name: 'counter',
+        initialState: {
+          value: 0
+        },
+        reducers: {
+          incremented: state => {
+            // Redux Toolkit allows us to write "mutating" logic in reducers. It
+            // doesn't actually mutate the state because it uses the Immer library,
+            // which detects changes to a "draft state" and produces a brand new
+            // immutable state based off those changes
+            state.value += 1
+          },
+          decremented: state => {
+            state.value -= 1
+          }
+        }
+      })
+​
+      const { incremented, decremented } = counterSlice.actions
+​
+      const store = RTK.configureStore({
+        reducer: counterSlice.reducer
+      })
+​
+      // Can still subscribe to the store
+      store.subscribe(() => console.log(store.getState()))
+​
+      // Still pass action objects to `dispatch`, but they're created for us
+      store.dispatch(incremented())
+      // {value: 1}
+      store.dispatch(incremented())
+      // {value: 2}
+      store.dispatch(decremented())
+      // {value: 1}
+​
+    </script>
+    <!-- Polymer -->
+    <script type="module">
+      import {PolymerElement, html} from 'https://unpkg.com/@polymer/polymer/polymer-element.js?module';
+      import 'https://unpkg.com/@polymer/iron-icons/iron-icons.js?module';
+      import 'https://unpkg.com/@polymer/paper-button/paper-button.js?module';
+      import 'https://unpkg.com/@polymer/app-layout/app-header/app-header.js?module';
+      import 'https://unpkg.com/@polymer/app-layout/app-header-layout/app-header-layout.js?module';
+      import 'https://unpkg.com/@polymer/app-layout/demo/sample-content.js?module';
+​
+      /* Simple Example */
+      const xCustomTagName = 'x-custom';
+​
+      class XCustom extends PolymerElement {
+        static get template() {
+          return html`
+            <button on-click="handleClick">Kick Me</button>
+          `;
+        }
+        
+        handleClick() {
+          alert('Ow!')
+        }
+      }
+      customElements.define(xCustomTagName, XCustom);
+​
+      /* Copper: Header 
+        @SEE: https://jsbin.com/bopuhozupa/1/edit?html,output
+      */
+      const copperHeaderTagName = 'copper-header';
+​
+      class CopperHeader extends PolymerElement {
+        
+        // Define public API properties
+        static get properties() { return { loggedIn: Boolean }}
+​
+        // Our HTML template
+        static get template() {
+          return html`
+            <style>
+                app-header {
+                  background-color: #4285f4;
+                  color: #fff;
+                }
+                
+              .image-container {
+                  width: 120px;
+                  height: 120px;
+                  margin: 0 15px -30px;
+                  border-bottom-left-radius: 3px;
+                  border-bottom-right-radius: 3px;
+                  background-color: #2196F3;
+                  @apply --shadow-elevation-2dp;
+              }
+              
+              iron-icon {
+                --iron-icon-height: 100px;
+                --iron-icon-width: 100px;
+                margin: 10px;
+              }            
+              
+              [threshold-triggered] .image-container {
+                  display: none;
+              }  
+              
+              sample-content {
+                margin-top: 56px;
+              }
+              
+              paper-button {
+                margin-bottom: 8px;
+              }
+          </style>
+          <app-header-layout fullbleed has-scrolling-region>
+              <app-header slot="header" threshold="72" fixed condenses>
+                <div style="height:84px;"></div>
+                <div style="height:72px;" sticky>
+                  <div class="image-container">
+                    <iron-icon icon="perm-media"></iron-icon>
+                  </div>              
+                </div>
+              </app-header>
+              <app-drawer id="drawer" swipe-open></app-drawer>
+              <sample-content size="5"></sample-content>
+              <paper-button on-tap="_swap">Next Page</paper-button>
+              <br/><br/>
+          </app-header-layout>
+          `;
+        }
+        
+        // Add methods to the element's public API
+        handleClick() {
+          alert('Ow!')
+        }
+      }
+      customElements.define(copperHeaderTagName, CopperHeader);
+​
+      /* Copper: SideBar */
+      const copperSideBarTagName = 'copper-side-bar';
+​
+      class CopperSideBar extends PolymerElement {
+        static get template() {
+          return html`
+            <div>Side Bar</div>
+          `;
+        }
+        
+        handleClick() {
+          alert('Ow!')
+        }
+      }
+​
+      customElements.define(copperSideBarTagName, CopperSideBar);
+​
+      /* Copper: Footer */
+      const copperFooterTagName = 'copper-footer';
+​
+      class CopperFooter extends PolymerElement {
+        static get template() {
+          return html`
+            <div>Footer</div>
+          `;
+        }
+        
+        handleClick() {
+          alert('Ow!')
+        }
+      }
+      customElements.define(copperFooterTagName, CopperFooter);
+​
+    </script>
+  </head>
+  <body>
+    <copper-header></copper-header>
+    <copper-side-bar></copper-side-bar>
+    <x-custom></x-custom>
+    <sample-element></sample-element>
+    <copper-footer></copper-footer>
+  </body>
+</html>
