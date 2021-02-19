@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en" class="h-100">
   <head>
@@ -8,13 +9,13 @@
     <meta name="generator" content="copper-lob">
     <title>Badactor.io - Cyber Range and Skills Platform</title>
     <link rel="canonical" href="https://badactor.io">
-​
+
     <!-- Abstract 
       _If_ the point of complicated frameworks aligns with this write-up: https://learnreact.design/posts/what-is-react
       _and_ modern browsers now offer many of these features.
       _then_ we don't need heavy frameworks anymore
     -->
-​
+
     <!-- Summary 
       Quick reading on the moving pieces
       0. [ui tech stack] https://jamstack.org/
@@ -25,11 +26,11 @@
         * More component info: https://www.webcomponents.org/
         * Polymer tuts: https://dev.to/bennypowers/lets-build-web-components-part-4-polymer-library-4dk2
     -->
-​
+
     <!-- Material Icons fonts. -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
-​
+
     <!-- 
       # Favicons
         * @SEE: https://www.keycdn.com/blog/make-a-favicon
@@ -38,7 +39,7 @@
     <!-- <link rel="shortcut icon" href="//cdn.keycdn.com/favicon.ico">
     <link rel="icon" sizes="16x16 32x32 64x64" href="//cdn.keycdn.com/favicon.ico">
     <link rel="apple-touch-icon" href="//cdn.keycdn.com/apple-touch-icon.png"> -->
-​
+
     <!-- AWS Amplify 
     //@ SEE: https://www.reddit.com/r/aws/comments/d71c5w/aws_amplify_for_vanilla_javascript_urgent/f0x9x3o?utm_source=share&utm_medium=web2x&context=3
       - exports object is created before brining in the aws-amplify source so it has something to populate.
@@ -47,23 +48,23 @@
     <script>
       var exports = {};
     </script>
-​
+
     <script src="https://unpkg.com/aws-amplify@1.1.40/dist/aws-amplify.min.js"></script>
     <script>
       
       var AWSAmplify = exports['aws-amplify'];
-​
+
       var Amplify = AWSAmplify.default;
-​
+
       /* HUB: PubSub Example */
       var Hub = AWSAmplify.Hub;
-​
+
       console.log(Hub);
-​
+
       Hub.listen('WhatThe', (data) => {          
         console.log(data);
       })
-​
+
       Hub.dispatch(
           'WhatThe', 
           { 
@@ -71,14 +72,14 @@
               data: {color:'blue'}, 
               message:'' 
       });
-​
+
       console.log(Object.keys(AWSAmplify));
     </script>
-​
+
     <!-- ReDuX ToolKit: Using Amplify HUB -->
     <script src="https://unpkg.com/@reduxjs/toolkit@latest/dist/redux-toolkit.umd.js"></script>
     <script>
-​
+
       const RTK = window.RTK;
       
       const counterSlice = RTK.createSlice({
@@ -99,16 +100,16 @@
           }
         }
       })
-​
+
       const { incremented, decremented } = counterSlice.actions
-​
+
       const store = RTK.configureStore({
         reducer: counterSlice.reducer
       })
-​
+
       // Can still subscribe to the store
       store.subscribe(() => console.log(store.getState()))
-​
+
       // Still pass action objects to `dispatch`, but they're created for us
       store.dispatch(incremented())
       // {value: 1}
@@ -116,7 +117,7 @@
       // {value: 2}
       store.dispatch(decremented())
       // {value: 1}
-​
+
     </script>
     <!-- Polymer -->
     <script type="module">
@@ -126,10 +127,10 @@
       import 'https://unpkg.com/@polymer/app-layout/app-header/app-header.js?module';
       import 'https://unpkg.com/@polymer/app-layout/app-header-layout/app-header-layout.js?module';
       import 'https://unpkg.com/@polymer/app-layout/demo/sample-content.js?module';
-​
+
       /* Simple Example */
       const xCustomTagName = 'x-custom';
-​
+
       class XCustom extends PolymerElement {
         static get template() {
           return html`
@@ -142,17 +143,17 @@
         }
       }
       customElements.define(xCustomTagName, XCustom);
-​
+
       /* Copper: Header 
         @SEE: https://jsbin.com/bopuhozupa/1/edit?html,output
       */
       const copperHeaderTagName = 'copper-header';
-​
+
       class CopperHeader extends PolymerElement {
         
         // Define public API properties
         static get properties() { return { loggedIn: Boolean }}
-​
+
         // Our HTML template
         static get template() {
           return html`
@@ -213,10 +214,10 @@
         }
       }
       customElements.define(copperHeaderTagName, CopperHeader);
-​
+
       /* Copper: SideBar */
       const copperSideBarTagName = 'copper-side-bar';
-​
+
       class CopperSideBar extends PolymerElement {
         static get template() {
           return html`
@@ -228,12 +229,12 @@
           alert('Ow!')
         }
       }
-​
+
       customElements.define(copperSideBarTagName, CopperSideBar);
-​
+
       /* Copper: Footer */
       const copperFooterTagName = 'copper-footer';
-​
+
       class CopperFooter extends PolymerElement {
         static get template() {
           return html`
@@ -246,7 +247,7 @@
         }
       }
       customElements.define(copperFooterTagName, CopperFooter);
-​
+
     </script>
   </head>
   <body>
