@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./aws-amplify.min.js">  </script>
+    <script>
+        aws_amplify.Amplify.configure({
+            "aws_project_region": "us-east-1",
+            "aws_cognito_identity_pool_id": "us-east-1:ec3d9d91-2de7-486a-8229-ffab1ceb29db",
+            "aws_cognito_region": "us-east-1",
+            "aws_user_pools_id": "us-east-1_BazSLcJ9F",
+            "aws_user_pools_web_client_id": "6a5knots08ne62gbgprhgp0ug0",
+            "oauth": {}
+        });
+        //test with username: test password: test1234
+        function signIn() {
+            var email = document.getElementById("email").value;
+            var pass = document.getElementById("pwd").value;
+            try {
+                aws_amplify.Amplify.Auth.signIn(
+                    email, pass
+                ).then(data => {
+                    console.log("successfully logged in")
+                    console.log(data)
+                }
+                );
+                
+                alert("Signed In. Check Console")
+            } catch (error) {
+                console.log('error signing in', error);
+                alert("Error signing in. Check Console")
+            }
+        }
+        
+        function signUp() {
+            var email = document.getElementById("remail").value;
+            var pass = document.getElementById("repass").value;
+            var uname = document.getElementById("reuser").value;
+            try {
+                console.log("try to login");
+                const { user } = aws_amplify.Amplify.Auth.signUp({
+                    username: uname,
+                    password: pass,
+                    attributes: {
+                        email: email // optional
+                    }
+                });
+                console.log(user);
+                alert("Signed Up!! Check Console")
+            } catch (error) {
+                console.log('error signing up:', error);
+                alert("Error signing up. Check Console")
+            }
+        }
+
+    </script>
+</head>
+
+<body>
+    <h4>Sign In</h4>
+
+    <input type="email" id="email">
+    <input type="password" name="pass" id="pwd">
+    <button id="signin" onclick="signIn()">Sign In</button>
+    <!-- AWS Cognito
+    //after signing up you will need to go to cognito-> user pools-> thirteendeltaauth4bd7b92f_userpool_4bd7b92f-dev -> confirm user
+    -->
+    <h4>Sign Up</h4>
+    email:
+    <input type="email" name="remail" id="remail">
+    <br />
+    password:
+    <input type="password" name="repass" id="repass">
+    <br />
+    username:
+    <input type="text" id="reuser">
+    <br />
+    <button id="signup" onclick="signUp()">Sign Up</button>
+</body>
+
+</html>
