@@ -17,11 +17,11 @@
         });
         //test with username: test password: test1234
         function signIn() {
-            var email = document.getElementById("email").value;
+            var username = document.getElementById("username").value;
             var pass = document.getElementById("pwd").value;
             try {
                 aws_amplify.Amplify.Auth.signIn(
-                    email, pass
+                    username, pass
                 ).then(data => {
                     console.log("successfully logged in")
                     console.log(data)
@@ -62,8 +62,12 @@
 <body>
     <h4>Sign In</h4>
 
-    <input type="email" id="email">
+    Username:
+    <input type="text" id="username">
+    <br>
+    Password:
     <input type="password" name="pass" id="pwd">
+    <br>
     <button id="signin" onclick="signIn()">Sign In</button>
     <!-- AWS Cognito
     //after signing up you will need to go to cognito-> user pools-> thirteendeltaauth4bd7b92f_userpool_4bd7b92f-dev -> confirm user
