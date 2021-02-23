@@ -21,11 +21,18 @@ We taken the best of web development best practices to provide a AWS Amplify Boi
 
 ## Roadmap
 
+## Influences
+
+* HTML5 Boilerplate [^1]: Represents our default `index.html` container.
+* Amplify JS [^2][^3][^4]: AWS Fullstack SDK
+* Redux [^5]: State container
+* Polymer [^6]: The web components library used by copper-components.
+  
 ## References
 
 [^1]: https://github.com/h5bp/html5-boilerplate
 [^2]: https://github.com/aws-amplify/amplify-js
 [^3]: https://aws.amazon.com/amplify/
 [^4]: https://www.npmjs.com/package/@aws-amplify/ui-components#web-components
-[^5]:
-[^6]:
+[^5]: https://redux.js.org/
+[^6]: https://www.polymer-project.org/
