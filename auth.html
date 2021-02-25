@@ -41,7 +41,7 @@
             var uname = document.getElementById("reuser").value;
             try {
                 console.log("try to login");
-                const { user } = aws_amplify.Amplify.Auth.signUp({
+                const { user } = await aws_amplify.Amplify.Auth.signUp({
                     username: uname,
                     password: pass,
                     attributes: {
@@ -56,12 +56,40 @@
             }
         }
 
+        async function confirmSignUp() {
+            var username = document.getElementById("confirmUser").value;
+            var code = document.getElementById("confirmCode").value; 
+            try {
+                await aws_amplify.Amplify.Auth.confirmSignUp(username, code);
+            } catch (error) {
+                console.log('error confirming sign up', error);
+            }
+        }
+
+        async function resendConfirmationCode() {
+            var username = document.getElementById("resendUser").value;
+            try {
+                await aws_amplify.Amplify.Auth.resendSignUp(username);
+                console.log('code resent successfully');
+            } catch (err) {
+                console.log('error resending code: ', err);
+            }
+        }
+
+        async function signOut() {
+            try {
+                await aws_amplify.Amplify.Auth.signOut();
+            } catch (error) {
+                console.log('error signing out: ', error);
+            }
+        }
+
     </script>
 </head>
 
 <body>
+    <!-- Sign in -->
     <h4>Sign In</h4>
-
     Username:
     <input type="text" id="username">
     <br>
@@ -83,6 +111,31 @@
     <input type="text" id="reuser">
     <br />
     <button id="signup" onclick="signUp()">Sign Up</button>
+    
+    <!---Confirmation portion of the code-->
+    <br />
+    <h4>Confirm Sign Up</h4>
+    username:
+    <input type="text" id="confirmUser">
+    <br />
+    confirmation code:
+    <input type="text" id="confirmCode">
+    <br />
+    <button id="confirm" onclick="confirmSignUp()">confirm</button>
+
+     <!---Resend code-->
+     <br />
+     <h4>Re-send Confirmation Code</h4>
+     username:
+     <input type="text" id="resendUser">     
+     <br />
+     <button id="resend" onclick="resendConfirmationCode()">resend confirmation code</button>
+
+     <!---Sign out-->
+     <br />
+     <h4>Sign out</h4>>     
+     <br />
+     <button id="signout" onclick="signOut()">sign out</button>
 </body>
 
 </html>
