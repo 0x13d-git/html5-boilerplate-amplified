@@ -16,26 +16,25 @@
             "oauth": {}
         });
         //test with username: test password: test1234
-        function signIn() {
+        
+        
+
+        async function signIn() {
             var username = document.getElementById("username").value;
             var pass = document.getElementById("pwd").value;
             try {
-                aws_amplify.Amplify.Auth.signIn(
+                console.log("about to login")
+                const user = await aws_amplify.Amplify.Auth.signIn(
                     username, pass
-                ).then(data => {
-                    console.log("successfully logged in")
-                    console.log(data)
-                }
                 );
-                
-                alert("Signed In. Check Console")
+                console.log("successfully logged in")                
+                console.log(user)                                
             } catch (error) {
                 console.log('error signing in', error);
-                alert("Error signing in. Check Console")
             }
         }
         
-        function signUp() {
+        async function signUp() {
             var email = document.getElementById("remail").value;
             var pass = document.getElementById("repass").value;
             var uname = document.getElementById("reuser").value;
