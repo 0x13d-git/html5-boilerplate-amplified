@@ -104,3 +104,6 @@ dist
 .tern-port
 /.idea/
 /html5-boilerplate-amplified.iml
+
+# Amplify setup
+/amplify-js-app
