@@ -15,126 +15,34 @@
             "aws_user_pools_web_client_id": "6a5knots08ne62gbgprhgp0ug0",
             "oauth": {}
         });
-        //test with username: test password: test1234
-        
         
 
-        async function signIn() {
-            var username = document.getElementById("username").value;
-            var pass = document.getElementById("pwd").value;
-            try {
-                console.log("about to login")
-                const user = await aws_amplify.Amplify.Auth.signIn(
-                    username, pass
-                );
-                console.log("successfully logged in")                
-                console.log(user)                                
-            } catch (error) {
-                console.log('error signing in', error);
-            }
-        }
-        
-        async function signUp() {
-            var email = document.getElementById("remail").value;
-            var pass = document.getElementById("repass").value;
-            var uname = document.getElementById("reuser").value;
-            try {
-                console.log("try to login");
-                const { user } = await aws_amplify.Amplify.Auth.signUp({
-                    username: uname,
-                    password: pass,
-                    attributes: {
-                        email: email // optional
-                    }
-                });
-                console.log(user);
-                alert("Signed Up!! Check Console")
-            } catch (error) {
-                console.log('error signing up:', error);
-                alert("Error signing up. Check Console")
-            }
-        }
-
-        async function confirmSignUp() {
-            var username = document.getElementById("confirmUser").value;
-            var code = document.getElementById("confirmCode").value; 
-            try {
-                await aws_amplify.Amplify.Auth.confirmSignUp(username, code);
-            } catch (error) {
-                console.log('error confirming sign up', error);
-            }
-        }
-
-        async function resendConfirmationCode() {
-            var username = document.getElementById("resendUser").value;
-            try {
-                await aws_amplify.Amplify.Auth.resendSignUp(username);
-                console.log('code resent successfully');
-            } catch (err) {
-                console.log('error resending code: ', err);
-            }
-        }
-
-        async function signOut() {
-            try {
-                await aws_amplify.Amplify.Auth.signOut();
-            } catch (error) {
-                console.log('error signing out: ', error);
-            }
-        }
-
+    </script>
+    <script type="module">
+        import { PolymerElement, html } from 'https://unpkg.com/@polymer/polymer/polymer-element.js?module';
+        import '../copper-components/src/components/copper-signin.js';
+        import '../copper-components/src/components/copper-signup.js';
+        import '../copper-components/src/components/copper-confirm-code.js';
+        import '../copper-components/src/components/copper-signout.js';
     </script>
 </head>
 
 <body>
-    <!-- Sign in -->
-    <h4>Sign In</h4>
-    Username:
-    <input type="text" id="username">
-    <br>
-    Password:
-    <input type="password" name="pass" id="pwd">
-    <br>
-    <button id="signin" onclick="signIn()">Sign In</button>
+
+    <!--test with username: test password: test1234 -->
+    <copper-signin></copper-signin>
+    <copper-signup></copper-signup>
     <!-- AWS Cognito
-    //after signing up you will need to go to cognito-> user pools-> thirteendeltaauth4bd7b92f_userpool_4bd7b92f-dev -> confirm user
+        manual confirm - after signing up you will need to go to cognito-> user pools-> thirteendeltaauth4bd7b92f_userpool_4bd7b92f-dev -> confirm user        
+        auto confirm - confirm with form. can also resend confirmation code
+    -->        
+    <copper-confirm-code></copper-confirm-code>   
+    <!---
+        Sign out - https://docs.amplify.aws/lib/auth/emailpassword/q/platform/js#sign-out
+        can also do a global sign out. review above link
     -->
-    <h4>Sign Up</h4>
-    email:
-    <input type="email" name="remail" id="remail">
-    <br />
-    password:
-    <input type="password" name="repass" id="repass">
-    <br />
-    username:
-    <input type="text" id="reuser">
-    <br />
-    <button id="signup" onclick="signUp()">Sign Up</button>
+    <copper-signout></copper-signout>
     
-    <!---Confirmation portion of the code-->
-    <br />
-    <h4>Confirm Sign Up</h4>
-    username:
-    <input type="text" id="confirmUser">
-    <br />
-    confirmation code:
-    <input type="text" id="confirmCode">
-    <br />
-    <button id="confirm" onclick="confirmSignUp()">confirm</button>
-
-     <!---Resend code-->
-     <br />
-     <h4>Re-send Confirmation Code</h4>
-     username:
-     <input type="text" id="resendUser">     
-     <br />
-     <button id="resend" onclick="resendConfirmationCode()">resend confirmation code</button>
-
-     <!---Sign out-->
-     <br />
-     <h4>Sign out</h4>>     
-     <br />
-     <button id="signout" onclick="signOut()">sign out</button>
 </body>
 
 </html>
