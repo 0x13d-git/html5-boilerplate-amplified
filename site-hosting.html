@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Test</title>
+    <script src="./aws-amplify.min.js">  </script>
+    <script>
+        aws_amplify.Amplify.configure({
+            "aws_project_region": "us-east-1",
+            "aws_cognito_region": "us-east-1",
+            "aws_user_pools_id": "us-east-1_kuc6VXZCL",
+            "aws_cognito_identity_pool_id": "us-east-1:8fec869e-fad3-402a-b4dd-ddf73e94b50e",
+            "aws_user_pools_web_client_id": "siteho1a7e469b_app_clientWeb",
+            "aws_user_files_s3_bucket": "13d-site-hosting113208-dev",
+            "aws_user_files_s3_bucket_region": "us-east-1"
+        });
+
+        let linkDisabled;
+
+        //test with username: test password: test1234
+        function push() {
+            try {
+                page = aws_amplify.Amplify.Storage.get(
+                    document.getElementById("fileName").value, { level: `public`}
+                ).then(signedUrl => {
+                    console.log(signedUrl);
+                    document.getElementById("page-link").text = "site-hosting.html";
+                    document.getElementById("page-link").href = signedUrl;
+                });
+
+            } catch (error) {
+                console.log('error signing in', error);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h4>Storage Test</h4>
+
+    File to Open:
+    <input type="text" id="fileName">
+    <br>
+    <button id="push" onclick="push()">Get Page</button>
+    <br>
+    <a id="page-link" target="_blank"></a>
+</body>
+
+</html>
