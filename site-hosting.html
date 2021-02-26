@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Storage Test</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="./aws-amplify.min.js">  </script>
     <script>
         aws_amplify.Amplify.configure({
@@ -17,29 +18,68 @@
             "aws_user_files_s3_bucket_region": "us-east-1"
         });
 
-        //test with text 'site-hosting.html'
         function push() {
-            page = aws_amplify.Amplify.Storage.get(
-                document.getElementById("fileName").value, { level: `public`}
-            ).then(signedUrl => {
-                console.log(signedUrl);
-                document.getElementById("page-link").text = "site-hosting.html";
-                document.getElementById("page-link").href = signedUrl;
-            })
-            .catch(error => console.log(error));
+            files = document.getElementById("fileNames").files;
+            for (i = 0; i < files.length; i++){
+                let file = files[i];
+                aws_amplify.Amplify.Storage.put(file.name, file, { level: `public`})
+                    .then(response => console.log(response))
+                    .catch(error => console.log(error));
+            }
+            files.files = undefined;
+            load();
+        }
+
+        function load(){
+            let sites = ["api.html","auth.html","index.html","site-hosting.html"];
+
+            let table = document.getElementById("sites-table");
+            let promises = [];
+            for (i = 0; i < sites.length; i++){
+                promises.push(aws_amplify.Amplify.Storage.get(sites[i], { level: `public` })
+                    .then(signedUrl => {
+                        return Promise.resolve(signedUrl);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
+                );
+            }
+
+            Promise.all(promises).then(results => {
+                for (i = 0; i < results.length; i++){
+                    var row = document.createElement("tr");
+                    var linkCell = document.createElement("td");
+                    var ownerCell = document.createElement("td");
+                    var link = document.createElement("a")
+
+                    link.text = sites[i];
+                    link.href = results[i];
+                    linkCell.appendChild(link);
+                    ownerCell.textContent = "13d-operation-copper-coins";
+                    row.appendChild(ownerCell);
+                    row.appendChild(linkCell);
+                    table.appendChild(row);
+                }
+            });
         }
     </script>
 </head>
 
-<body>
-    <h4>Storage Test</h4>
+<body onload="load()">
+    <h4>Hosted Sites</h4>
+
+    <table class="table" id="sites-table"></table>
 
     File to Open:
-    <input type="text" id="fileName">
     <br>
-    <button id="push" onclick="push()">Get Page</button>
+    <input type="file" id="fileNames" multiple="true">
     <br>
-    <a id="page-link" target="_blank"></a>
+    <button id="push" onclick="push()">Upload Content</button>
+    <br>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 
 </html>
