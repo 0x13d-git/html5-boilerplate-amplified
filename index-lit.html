@@ -1,0 +1,370 @@
+
+<!doctype html>
+<html lang="en" class="h-100">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Ari Ugwu">
+    <meta name="generator" content="copper-lob">
+    <title>HTML5 Boilerplate - Amplified</title>
+    <link rel="canonical" href="https://badactor.io">
+
+    <!-- Abstract & Opinions
+      - This boilerplate is hoped to provide the fastest possible way to develop web/mobile solutions.
+      - Each library/approach selected should act as a polyfill for planned (or hoped for) native functionality.
+      - Build systems and web servers are never required to develop, test, or deploy.
+    -->
+
+    <!-- The Stack
+      Quick reading on the moving pieces
+      00. [ui tech stack] https://jamstack.org/
+      01. [app shell] https://developers.google.com/web/fundamentals/architecture/app-shell
+      02. [style] https://material.io/design/material-studies/rally.html#product-architecture
+        * https://github.com/medialize/sass.js/
+      03. [state management] https://redux-toolkit.js.org/tutorials/basic-tutorial Redux
+      04. [service fabric] https://aws.amazon.com/amplify/ AmplifyJS
+      05. [web components] https://lit-element.polymer-project.org/ Lit Element
+        * https://lit-element.polymer-project.org/guide/start
+        * More component info: https://www.webcomponents.org/
+      06. [pwa core features] https://github.com/Polymer/pwa-helpers
+      07. [routing] Example using pwa-helpers - https://github.com/Polymer/pwa-starter-kit/blob/master/src/components/my-app.js
+      08. [datetime] momnetjs https://momentjs.com/
+      09. [utility] lodash https://lodash.com/
+      10. [workflows] xstate https://github.com/davidkpiano/xstate
+      11. [themeing] https://github.com/medialize/sass.js/
+    -->
+
+    <!-- Polyfills -->
+    <script src="https://unpkg.com/@webcomponents/webcomponentsjs@next/webcomponents-loader.js"></script>
+
+    <!-- Resets and Browser Tweaks -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" rel="stylesheet" />
+
+    <!-- Material Styles -->
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet" />
+
+    <!-- Material Web Components-->
+    <script type="module" src="https://unpkg.com/@material/mwc-drawer?module"></script>
+    <script type="module" src="https://unpkg.com/@material/mwc-top-app-bar?module"></script>
+    <script type="module" src="https://unpkg.com/@material/mwc-icon-button?module"></script>
+
+    <!-- Material Icons fonts. -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet" />
+
+    <!-- Logging: Logdown  -->
+    <script type="text/javascript" src="https://unpkg.com/logdown@3.3.1/dist/logdown.min.js"></script>
+
+    <!-- Redux -->
+    <script src="https://unpkg.com/redux@latest/dist/redux.min.js"></script>
+
+    <!-- MomentJs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" crossorigin="anonymous"></script>
+
+    <!-- LoDash -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+
+    <!-- 
+      # Favicons
+        * @SEE: https://www.keycdn.com/blog/make-a-favicon
+    -->
+    
+    <!-- <link rel="shortcut icon" href="//cdn.keycdn.com/favicon.ico">
+    <link rel="icon" sizes="16x16 32x32 64x64" href="//cdn.keycdn.com/favicon.ico">
+    <link rel="apple-touch-icon" href="//cdn.keycdn.com/apple-touch-icon.png"> -->
+
+        <!-- SASS Styling
+      * It would be good to have an elegant solution for SASS for times when using the built in CSS variables conflicts with a library or just doesn't make sense.
+      * @SEE: https://code.sololearn.com/WKNQYtDaiK6q/?ref=app
+    -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sass.js/0.9.12/sass.sync.min.js"></script>
+    <style type="scss">
+      @mixin l2d($color,$strength){
+          background:linear-gradient(lighten($color,$strength),darken($color,$strength));
+      }
+      body{
+          @include l2d(#DEDEDE,10%);
+          min-height:100vh;
+      }
+    </style>
+    <!-- BEGIN: cc init -->
+    <script>
+      // Required for AWS Amplify to populate inline like this. May not be requred when pulling in via script tag.
+      var exports = {}
+    </script>
+    <script type="module">
+      // AWS Amplify 
+      //@ SEE: https://www.reddit.com/r/aws/comments/d71c5w/aws_amplify_for_vanilla_javascript_urgent/f0x9x3o?utm_source=share&utm_medium=web2x&context=3
+      //  - exports object is created before brining in the aws-amplify source so it has something to populate.
+      //  - ref: https://docs.amplify.aws/lib/datastore/getting-started/q/platform/js
+      import "https://unpkg.com/aws-amplify@1.1.40/dist/aws-amplify.min.js"
+
+      // Lit Element
+      import { LitElement, html, property, customElement } from 'https://unpkg.com/@polymer/lit-element@latest/lit-element.js?module'
+
+      // PWA Helpers
+      import { connect, lazyReducerEnhancer, installRouter, updateMetadata } from 'https://unpkg.com/pwa-helpers@0.9.1/pwa-helpers.js'
+
+      class cc {
+          constructor(params) {
+              this.logger = params.logger
+              this.settings = params.settings
+              this.amplify = params.amplify
+              this.pwa = params.pwa
+              this.moment = params.moment,
+              this.lodash = params.lodash,
+              this.sass = params.sass
+          }
+
+          /* Quality of Life Helper(s) */
+          getUser() {}
+      }
+      
+      const params = {
+        logger: logdown('cc'),
+        amplify: exports['aws-amplify'],
+        settings: null,
+        pwa: {
+          connect: connect,
+          lazyReducerEnhancer: lazyReducerEnhancer,
+          installRouter: installRouter,
+          updateMetadata: updateMetadata
+        },
+        moment: moment,
+        lodash: _,
+        sass: Sass
+      }
+
+      const _cc = new cc(params);
+
+      // console.log(awsAmplify)
+      _cc.amplify.API.configure({
+            "aws_project_region": "us-east-1",
+            "aws_cognito_identity_pool_id": "us-east-1:ec3d9d91-2de7-486a-8229-ffab1ceb29db",
+            "aws_cognito_region": "us-east-1",
+            "aws_user_pools_id": "us-east-1_BazSLcJ9F",
+            "aws_user_pools_web_client_id": "6a5knots08ne62gbgprhgp0ug0",
+            "oauth": {},
+            API: {
+                endpoints: [
+                    {
+                        name: "MyAPIGatewayAPI",
+                        endpoint: "https://utj5x5mki5.execute-api.us-east-1.amazonaws.com/dev"
+                    }
+                ]
+            }
+        });
+
+        _cc.logger.state.isEnabled = true
+
+        /* HUB: PubSub Example */
+        var Hub = _cc.amplify.Hub;
+
+        Hub.listen('foo', (data) => {          
+            console.log(data);
+        })
+
+
+        // xState Machine for slug
+        // @see: https://xstate.js.org/docs/guides/context.html#initial-context
+        import { Machine, assign } from 'https://unpkg.com/xstate@4.16.2/dist/xstate.web.js'
+
+        // Action to increment the context amount
+        const addWater = assign({
+          amount: (context, event) => context.amount + 1
+        });
+
+        // Guard to check if the glass is full
+        function glassIsFull(context, event) {
+          return context.amount >= 10;
+        }
+
+        const currentMachine = Machine(
+          {
+            id: 'glass',
+            // the initial context (extended state) of the statechart
+            context: {
+              amount: 0
+            },
+            initial: 'empty',
+            states: {
+              empty: {
+                on: {
+                  FILL: {
+                    target: 'filling',
+                    actions: 'addWater'
+                  }
+                }
+              },
+              filling: {
+                // Transient transition
+                always: {
+                  target: 'full',
+                  cond: 'glassIsFull'
+                },
+                on: {
+                  FILL: {
+                    target: 'filling',
+                    actions: 'addWater'
+                  }
+                }
+              },
+              full: {}
+            }
+          },
+          {
+            actions: { addWater },
+            guards: { glassIsFull }
+          }
+        );
+
+        // retrieved dynamically
+        const someContext = { amount: 42, };
+
+        const dynamicCounterMachine = currentMachine.withContext(someContext);
+
+        console.log(dynamicCounterMachine.initialState.context)
+
+        const nextState = currentMachine.transition(currentMachine.initialState, 'FILL');
+
+        console.log(nextState.context)
+        // => { amount: 1 }
+
+        console.log(dynamicCounterMachine.initialState.context)
+
+        // ReDuX ToolKit "Slice" - the actions and reducers just for this component
+        
+        function counter(state, action) {
+          if (typeof state === 'undefined') {
+            return {
+              count: 0,
+              cc: _cc
+            }
+          }
+
+          switch (action.type) {
+            case 'INCREMENT':
+              state.count + 1
+              return state
+            case 'DECREMENT':
+              state.count - 1
+              return state
+            case 'SLUG':
+              state.cc.amplify.Hub.dispatch(
+                'foo', 
+                { 
+                  event: 'buttonClick', 
+                  data: state.count.toString(), 
+                  message:'NOTE: Telling anyone that cares that SLUG fired.' 
+                }
+              );
+
+              //console.log(cc.logger)      	
+              // Log messages will be written to the window's console.
+              state.cc.logger.info('/* Copper Slug: Logging Smoke Tests */')
+              state.cc.logger.info('-- logging a series of test statements.')
+              state.cc.logger.info('* Amplify Features')
+              state.cc.logger.log(Object.keys(state.cc.amplify))
+              state.cc.logger.log('/* BEGIN example log statements */')
+              state.cc.logger.info('This is an info statement.')
+              state.cc.logger.warn('Warning statement!')
+              state.cc.logger.error('Example error message.')
+
+                      //Smoke test. TODO: Put this in the slug.
+              state.cc.amplify.API.get("MyAPIGatewayAPI", "", {})
+                .then(response => {
+                    state.cc.logger.info(JSON.stringify(response));
+
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+              
+              state.cc.logger.log('/* END example log statements */')
+              return state
+            default:
+              return state
+          }
+        }
+
+        var store = Redux.createStore(counter)
+        window.store = store //TODO: change to export when using a build system and/or external files.
+
+    </script>
+    <!-- END: cc init -->
+
+    <!-- Begin: Copper::Slug -->
+    <script type="module">
+
+     import { LitElement, html, property, customElement } from 'https://unpkg.com/@polymer/lit-element@latest/lit-element.js?module'
+     import { connect, lazyReducerEnhancer } from 'https://unpkg.com/pwa-helpers@0.9.1/pwa-helpers.js'
+
+        class CopperSlug extends connect(store)(LitElement) {
+            render() {
+                return html`
+                <div>
+                  <h2 "mdc-typography--headline2">Copper: Slug</h2>
+                  <h3 "mdc-typography--headline3">A test component that is very loud, slow, and tries to touch every part of the <a href="#"><strong><em>cc</em></strong></a> library.</h3>
+                  <div class="mdc-typography--body1">
+                    <p>The following button will kick off a series of steps to trigger parts of the application shell. Open the developer's console to observe output statements.</p>
+                    <p><small>*a progress indicator will be displayed in this space once the test begins.</small></p>
+                    <button class="fav-button" @click="${() => store.dispatch({ type: 'SLUG' })}">
+                      Press Me!
+                    </button>
+                  </div>
+                </div>
+                `
+            }
+
+            stateChanged(state) {
+              this.textContent = state.toString()
+              state.cc.logger.info('NOTE: Copper Slug sees state changes.')
+            }
+        }
+
+        customElements.define('copper-slug', CopperSlug);
+
+
+    </script>
+    <!-- END: Copper::Slug -->
+
+  </head>
+  <body class="mdc-typography">
+    <mwc-drawer hasHeader type="modal">
+      <span slot="title">Drawer Title</span>
+      <span slot="subtitle">subtitle</span>
+      <div>
+        <p>Drawer content!</p>
+        <mwc-icon-button icon="gesture"></mwc-icon-button>
+        <mwc-icon-button icon="gavel"></mwc-icon-button>
+      </div>
+      <div slot="appContent">
+        <mwc-top-app-bar>
+          <mwc-icon-button slot="navigationIcon" icon="menu"></mwc-icon-button>
+          <div slot="title">Title</div>
+        </mwc-top-app-bar>
+        <div>
+          <copper-slug></copper-slug>
+        </div>
+        <hr />
+      </div>
+  </mwc-drawer>
+  <script>
+    var drawer = document.getElementsByTagName('mwc-drawer')[0];
+    var container = drawer.parentNode;
+    container.addEventListener('MDCTopAppBar:nav', function(e) {
+      drawer.open = !drawer.open;
+    });
+  </script>
+      <!-- Wire up SASS compile -->
+      <script>
+        Sass.compile(document.querySelector("style[type=scss]").innerHTML,function(res){
+            var s=document.createElement("style");
+            s.innerHTML=res.text;
+            res.formatted&&console.error(res.formatted); //if error console.error it.
+            res.text&&document.head.appendChild(s);// append style element only if no error.
+        });
+      </script>
+</body>
+</html>
