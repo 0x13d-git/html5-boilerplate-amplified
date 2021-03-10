@@ -80,27 +80,16 @@
     -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sass.js/0.9.12/sass.sync.min.js"></script>
     <style type="scss">
-      @mixin l2d($color,$strength){
+      @mixin l3d($color,$strength){
           background:linear-gradient(lighten($color,$strength),darken($color,$strength));
       }
       body{
-          @include l2d(#DEDEDE,10%);
+          @include l3d(#DEDEDE,10%);
           min-height:100vh;
       }
       
     </style>
 
-    <!-- CSS Variables -->
-    <style type="css">
-      :root {
-        --mdc-theme-primary: #1d2d36;
-      }
-
-      .mdc-top-app-bar{ background-color: var(--mdc-theme-primary, #1d2d36); }
-      .mdc-theme--background {
-        background-color: #1d2d36;
-      }
-    </style>
     <!-- BEGIN: cc init -->
     <script>
       // Required for AWS Amplify to populate inline like this. May not be requred when pulling in via script tag.
