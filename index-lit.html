@@ -74,9 +74,9 @@
     <link rel="icon" sizes="16x16 32x32 64x64" href="//cdn.keycdn.com/favicon.ico">
     <link rel="apple-touch-icon" href="//cdn.keycdn.com/apple-touch-icon.png"> -->
 
-        <!-- SASS Styling
-      * It would be good to have an elegant solution for SASS for times when using the built in CSS variables conflicts with a library or just doesn't make sense.
-      * @SEE: https://code.sololearn.com/WKNQYtDaiK6q/?ref=app
+    <!-- SASS Styling
+    * It would be good to have an elegant solution for SASS complilation in browser and storage local. This would help primarily to recreate CSSZenGarden
+    * @SEE: https://code.sololearn.com/WKNQYtDaiK6q/?ref=app
     -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sass.js/0.9.12/sass.sync.min.js"></script>
     <style type="scss">
@@ -86,6 +86,19 @@
       body{
           @include l2d(#DEDEDE,10%);
           min-height:100vh;
+      }
+      
+    </style>
+
+    <!-- CSS Variables -->
+    <style type="css">
+      :root {
+        --mdc-theme-primary: #1d2d36;
+      }
+
+      .mdc-top-app-bar{ background-color: var(--mdc-theme-primary, #1d2d36); }
+      .mdc-theme--background {
+        background-color: #1d2d36;
       }
     </style>
     <!-- BEGIN: cc init -->
@@ -100,11 +113,12 @@
       //  - ref: https://docs.amplify.aws/lib/datastore/getting-started/q/platform/js
       import "https://unpkg.com/aws-amplify@1.1.40/dist/aws-amplify.min.js"
 
-      // Lit Element
-      import { LitElement, html, property, customElement } from 'https://unpkg.com/@polymer/lit-element@latest/lit-element.js?module'
-
       // PWA Helpers
       import { connect, lazyReducerEnhancer, installRouter, updateMetadata } from 'https://unpkg.com/pwa-helpers@0.9.1/pwa-helpers.js'
+
+      // xState
+      // @see: https://xstate.js.org/docs/guides/context.html#initial-context
+      import { Machine, assign } from 'https://unpkg.com/xstate@4.16.2/dist/xstate.web.js'
 
       class cc {
           constructor(params) {
@@ -112,9 +126,10 @@
               this.settings = params.settings
               this.amplify = params.amplify
               this.pwa = params.pwa
-              this.moment = params.moment,
-              this.lodash = params.lodash,
+              this.moment = params.moment
+              this.lodash = params.lodash
               this.sass = params.sass
+              this.xstate = params.xstate
           }
 
           /* Quality of Life Helper(s) */
@@ -133,7 +148,11 @@
         },
         moment: moment,
         lodash: _,
-        sass: Sass
+        sass: Sass,
+        xstate: {
+          Machine: Machine,
+          assign: assign
+        }
       }
 
       const _cc = new cc(params);
@@ -159,16 +178,13 @@
         _cc.logger.state.isEnabled = true
 
         /* HUB: PubSub Example */
-        var Hub = _cc.amplify.Hub;
 
-        Hub.listen('foo', (data) => {          
+        _cc.amplify.Hub.listen('foo', (data) => {          
             console.log(data);
         })
 
 
-        // xState Machine for slug
-        // @see: https://xstate.js.org/docs/guides/context.html#initial-context
-        import { Machine, assign } from 'https://unpkg.com/xstate@4.16.2/dist/xstate.web.js'
+        /* xState Machine for slug */
 
         // Action to increment the context amount
         const addWater = assign({
@@ -226,10 +242,10 @@
 
         console.log(dynamicCounterMachine.initialState.context)
 
-        const nextState = currentMachine.transition(currentMachine.initialState, 'FILL');
+        const nextState = dynamicCounterMachine.transition(dynamicCounterMachine.initialState, 'FILL');
 
         console.log(nextState.context)
-        // => { amount: 1 }
+        // => { amount: initial amount + 1 }
 
         console.log(dynamicCounterMachine.initialState.context)
 
@@ -263,15 +279,14 @@
               //console.log(cc.logger)      	
               // Log messages will be written to the window's console.
               state.cc.logger.info('/* Copper Slug: Logging Smoke Tests */')
-              state.cc.logger.info('-- logging a series of test statements.')
-              state.cc.logger.info('* Amplify Features')
+              
+              state.cc.logger.info('* Amplify object keys')
               state.cc.logger.log(Object.keys(state.cc.amplify))
-              state.cc.logger.log('/* BEGIN example log statements */')
-              state.cc.logger.info('This is an info statement.')
-              state.cc.logger.warn('Warning statement!')
-              state.cc.logger.error('Example error message.')
+              
+              state.cc.logger.info('* Change the primary theme color')
+              document.querySelector('body').style.setProperty('--mdc-theme-primary', '#1d2d36')
 
-                      //Smoke test. TODO: Put this in the slug.
+              state.cc.logger.info('* Grab API Data')
               state.cc.amplify.API.get("MyAPIGatewayAPI", "", {})
                 .then(response => {
                     state.cc.logger.info(JSON.stringify(response));
@@ -280,6 +295,11 @@
                 .catch(error => {
                     console.log(error);
                 });
+              
+              state.cc.logger.log('/* BEGIN example log statements */')
+              state.cc.logger.info('This is an info statement.')
+              state.cc.logger.warn('Warning statement!')
+              state.cc.logger.error('Example error message.')
               
               state.cc.logger.log('/* END example log statements */')
               return state
@@ -357,14 +377,14 @@
       drawer.open = !drawer.open;
     });
   </script>
-      <!-- Wire up SASS compile -->
-      <script>
-        Sass.compile(document.querySelector("style[type=scss]").innerHTML,function(res){
-            var s=document.createElement("style");
-            s.innerHTML=res.text;
-            res.formatted&&console.error(res.formatted); //if error console.error it.
-            res.text&&document.head.appendChild(s);// append style element only if no error.
-        });
-      </script>
+  <!-- Wire up SASS compile -->
+  <script>
+    Sass.compile(document.querySelector("style[type=scss]").innerHTML,function(res){
+        var s=document.createElement("style");
+        s.innerHTML=res.text;
+        res.formatted&&console.error(res.formatted); //if error console.error it.
+        res.text&&document.head.appendChild(s);// append style element only if no error.
+    });
+  </script>
 </body>
 </html>
