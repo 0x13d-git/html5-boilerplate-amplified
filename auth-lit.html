@@ -123,6 +123,52 @@
 
       /* Quality of Life Helper(s) */
       getUser() { }
+
+      isUserAuth() {        
+        this.amplify.Auth.currentAuthenticatedUser()
+        .then(data => {             
+          this.xstate.currentState.context = {isAuth: true}           
+          const curState = this.xstate.Machine.transition(this.xstate.currentState, 'isLoggedIn');        
+          this.xstate.currentState = curState          
+        })
+        .catch(data => {          
+          this.xstate.currentState.context = {isAuth: false}      
+          const curState = this.xstate.Machine.transition(this.xstate.currentState, 'isLoggedIn');        
+          this.xstate.currentState = curState  
+        })                     
+      }
+
+      logIn(username, pass, reduxStore) {
+        this.amplify.Auth.signIn(
+          username, pass
+          ).then(data => {      
+            console.log("successsfully logged in")      
+            this.xstate.currentState.context = {isAuth: true}
+            const curState = this.xstate.Machine.transition(this.xstate.currentState, 'logIn');
+            this.xstate.currentState = curState                      
+            reduxStore.dispatch( { type: 'LOGIN_SUCCESS'} )        
+          }).catch(error => {
+            console.log(error)
+            this.xstate.currentState.context = {isAuth: false}
+            const curState = this.xstate.Machine.transition(this.xstate.currentState, 'logIn');
+            this.xstate.currentState = curState                      
+          });      
+        }
+
+        logOut(reduxStore) {        
+          this.amplify.Auth.signOut()
+          .then(data => {
+            console.log("successfully logged out")
+            this.xstate.currentState.context = {isAuth: true}
+            const curState = this.xstate.Machine.transition(this.xstate.currentState, 'logOut');
+            this.xstate.currentState = curState    
+            reduxStore.dispatch( { type: 'LOGOUT_SUCCESS'} )               
+          }).catch(error => {
+            this.xstate.currentState.context = {isAuth: false}
+            const curState = this.xstate.Machine.transition(this.xstate.currentState, 'logOut');
+            this.xstate.currentState = curState  
+          });             
+        }
     }
 
     const params = {
@@ -140,7 +186,8 @@
       sass: Sass,
       xstate: {
         Machine: Machine,
-        assign: assign
+        assign: assign,
+        currentState: _
       }
     }
 
@@ -165,23 +212,88 @@
     })
 
     _cc.amplify.Hub.listen('auth', (data) => {
-      if(data.payload.event == 'configured') {
+      if (data.payload.event == 'configured') {
         console.log('the Auth module is configured');
-      }  
+      }
     });
 
+    const authMachine = Machine({
+    id: 'auth',
+    initial: 'unknown',
+    context: {
+        isAuth: false
+      },
+    states: {
+      unknown: {
+        on: {
+          isLoggedIn: [
+            {
+                target: 'authd',
+                cond: (context, event) => context.isAuth
+              },
+              { target: 'notAuthd' }
+          ]
+        }
+      },     
+
+      authd: {
+        on: {
+          logOut: [
+          {
+              target: 'notAuthd',
+              cond: (context, event) => context.isAuth
+            },
+            { target: 'failure' }
+          ] 
+        }
+      },
+
+      notAuthd: {
+        on: {
+          logIn: [
+          {
+              target: 'authd',
+              cond: (context, event) => context.isAuth
+            },
+            { target: 'failure' }
+          ] 
+        }
+      },  
+      dumb: {},
+      failure: {}
+
+    }
+  })  
+  _cc.xstate.Machine = authMachine
+  _cc.xstate.currentState = authMachine.initialState
+  var isAuth = _cc.isUserAuth();  
+  console.log("initial state is " + _cc.xstate.currentState.value)  
 
     // ReDuX ToolKit "Slice" - the actions and reducers just for this component
-
     function authState(state, action) {
       if (typeof state === 'undefined') {
-        return {          
+        return {
           cc: _cc
         }
-      }
+      }      
       state.cc.logger.info('action type is')
       state.cc.logger.info(action.type)
-      return state      
+
+      let xState = state.cc.xstate
+
+      switch (action.type) {
+        case 'LOGGING_IN':  
+          console.log("dispatched login")      
+          return state
+        case 'LOGGING_OUT':          
+          console.log("dispatched log out")
+          return state
+        default:
+          return state  
+      };
+      
+      
+      return state
     }
 
     var store = Redux.createStore(authState)
@@ -197,7 +309,7 @@
     import { connect, lazyReducerEnhancer } from 'https://unpkg.com/pwa-helpers@0.9.1/pwa-helpers.js'
 
     class CopperSignIn extends connect(store)(LitElement) {
-      
+
       render() {
         return html`        
         <div syle="display:none">
@@ -215,44 +327,32 @@
         `
       }
 
-      stateChanged(state) {
-        this.style.display = 'block';
-        state.cc.amplify.Hub.listen('auth', (data) => {
-          if(data.payload.event == 'signIn') {
-            console.log('hide sign in')                      
-            this.style.display = 'none';
-          }   
-          if(data.payload.event == 'signOut') {
-            console.log('show sign in')                      
-            this.style.display = 'block';
-          }         
-        });
-        
+      stateChanged(state) {     
+        const xstate = store.getState().cc.xstate
+        console.log('current xstate:' + xstate.currentState.value)
+        if (xstate.currentState.value == 'notAuthd') {
+          this.style.display = 'block';
+          console.log("display login")
+        } else {
+          this.style.display = 'none';
+          console.log("hide login")
+        }
       }
 
       _signIn(e) {
         const logger = store.getState().cc.logger
-        logger.info("about to sign in")        
+        const xstate = store.getState().cc.xstate
+        logger.info("about to sign in")
         var username = this.shadowRoot.getElementById("username").value
         var pass = this.shadowRoot.getElementById("pwd").value
-        
-        store.getState().cc.amplify.Auth.signIn(
-          username, pass
-        ).then(data => {
-          logger.info("successfully signed in")
-          logger.info(data)          
-        }
-        ).catch(error => {
-          logger.error('could not sign in');
-          logger.error(error)          
-        });
+        store.getState().cc.logIn(username, pass, store)      
       }
     }
 
     customElements.define('copper-signin', CopperSignIn);
 
     class CopperSignOut extends connect(store)(LitElement) {
-      
+
       render() {
         return html`
         <div>
@@ -265,32 +365,22 @@
       }
 
       stateChanged(state) {
-        this.textContent = state.toString()        
-        state.cc.logger.info('NOTE: Copper Signout sees state changes.')    
-        this.style.display = 'none';
-        //https://docs.amplify.aws/guides/authentication/listening-for-auth-events/q/platform/js
-        state.cc.amplify.Hub.listen('auth', (data) => {
-          if(data.payload.event == 'signIn') {
-            console.log('display signout')                      
-            this.style.display = 'block';
-          }         
-        });
+
+        const xstate = store.getState().cc.xstate
+        console.log('current xstate:' + xstate.currentState.value)
+        if (xstate.currentState.value == 'authd') {
+          this.style.display = 'block';
+          console.log("display log out")
+        } else {
+          this.style.display = 'none';
+          console.log("hide log out")
+        }
       }
 
       _signout(e) {
         const logger = store.getState().cc.logger
-        logger.info("about to sign out")                
-        store.getState().cc.amplify.Auth.signOut()
-        .then(data => {
-          logger.info("successfully signed out")
-          logger.info(data)
-          store.dispatch({ type: 'SIGNOUT_SUCCESS' })
-        }
-        ).catch(error => {
-          logger.error('could not sign out');
-          logger.error(error)
-          store.dispatch({ type: 'SIGNOUT_FAILURE' })
-        });
+        logger.info("sign out")
+        store.getState().cc.logOut(store)                      
       }
     }
 
@@ -317,6 +407,7 @@
         <div slot="title">Title</div>
       </mwc-top-app-bar>
       <div>
+        <!--test with username: test password: test1234 -->
         <copper-signin></copper-signin>
         <copper-signout></copper-signout>
       </div>
